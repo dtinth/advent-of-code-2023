@@ -36,3 +36,52 @@ pp games.sum { |id, sets|
     sets.map { |set| (set[k] || 0).to_i }.max }.inject(&:*)
 }
 ```
+
+```ruby
+# Day 3, Parsing
+matrix = [*$<].map(&:strip).map(&:chars)
+hash = Hash.new('.')
+matrix.each_with_index do |row, y|
+  row.each_with_index do |cell, x|
+    hash[[y, x]] = cell
+  end
+end
+
+# Day 3, Part 1
+sum = 0
+matrix.each_with_index do |row, y|
+  row.join.scan(/\d+/) {
+    num = $&.to_i
+    x_start = $`.size
+    x_end = x_start + $&.size - 1
+    o = []
+    (y-1..y+1).each do |yy|
+      (x_start-1..x_end+1).each do |xx|
+        o << hash[[yy, xx]]
+      end
+    end
+    sum += num if o.join.gsub(/[\d\.]/, '').size > 0
+  }
+end
+p sum
+
+# Day 3, Part 2
+numbers_next_to_stars = []
+matrix.each_with_index do |row, y|
+  row.join.scan(/\d+/) {
+    num = $&.to_i
+    x_start = $`.size
+    x_end = x_start + $&.size - 1
+    (y-1..y+1).each do |yy|
+      (x_start-1..x_end+1).each do |xx|
+        if hash[[yy, xx]] == '*'
+          numbers_next_to_stars << [num, [yy, xx]]
+        end
+      end
+    end
+  }
+end
+pp numbers_next_to_stars.group_by(&:last)
+  .filter { |k, v| v.size == 2 }
+  .sum { |k, v| v.map(&:first).inject(&:*) }
+```
