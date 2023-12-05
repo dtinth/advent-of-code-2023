@@ -85,3 +85,37 @@ pp numbers_next_to_stars.group_by(&:last)
   .filter { |k, v| v.size == 2 }
   .sum { |k, v| v.map(&:first).inject(&:*) }
 ```
+
+```ruby
+# Day 4
+class Card < Struct.new(:id, :winning_numbers, :numbers_you_have)
+  def points
+    m = matching_numbers
+    m == 0 ? 0 : 2 ** (m - 1)
+  end
+  def matching_numbers
+    (winning_numbers & numbers_you_have).size
+  end
+end
+
+# Day 4, Parsing
+cards = [*$<].map { |line|
+  left, right = line.split('|')
+  id, *winning_numbers = left.scan(/\d+/).map(&:to_i)
+  numbers_you_have = right.scan(/\d+/).map(&:to_i)
+  Card.new(id, winning_numbers, numbers_you_have)
+}
+
+# Day 4, Part 1
+p cards.sum(&:points)
+
+# Day 4, Part 2
+copies = cards.map { 1 }
+cards.each_with_index { |card, i|
+  wins = card.matching_numbers
+  (1..wins).each { |j|
+    copies[i + j] += copies[i]
+  }
+}
+p copies.sum
+```
